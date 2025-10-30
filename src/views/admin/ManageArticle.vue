@@ -70,11 +70,14 @@ function deleteArticle() {
   }).then((response) => {
     if (response.data.success) {
       getAPage()
+      ElMessageBox.alert("删除成功", "结果", { type: 'success' })
     } else {
-      ElMessageBox.alert(response.data.msg, '结果')
+      ElMessageBox.alert(response.data.msg, '结果', { type: 'error' })
     }
   }).catch((error) => {
-    ElMessageBox.alert("系统错误！", '结果')
+    ElMessageBox.alert("系统错误！", '结果', { type: 'error' })
+  }).finally(() => {
+    dialogVisible.value = false
   })
 }
 </script>

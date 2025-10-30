@@ -3,11 +3,16 @@ import { reactive, inject, ref } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { useStore } from '@/stores/my'
+
 import axios from 'axios'
+
+const store = useStore()
+const router = useRouter()
 
 let myData = reactive({
   "articleVOs": [],
-  "pageParams": { "page": 1, "rows": 4, "total": 100 }
+  "pageParams": { "page": 1, "rows": 4, "total": 10 }
 })
 
 function getAPage() {
@@ -43,9 +48,12 @@ function handleCurrentChange(newPage) {
   getAPage()
 }
 
-const router = useRouter()
 function editArticle1(articleId) {
-  router.push({ name: 'editArticle', query: { id: articleId } })
+  // 保存文章ID和当前页码信息到状态
+  store.articleId = articleId
+  store.page.pageParams = myData.pageParams
+  // 跳转到发布文章页面（编辑模式）
+  router.push({ name: 'publishArticle' })
 }
 
 let selectedArticleId

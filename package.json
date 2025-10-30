@@ -13,10 +13,11 @@
     "@tinymce/tinymce-vue": "^5.1.1",
     "axios": "^1.12.2",
     "element-plus": "^2.11.3",
-    "pinia": "^2.1.7",
+    "pinia": "^2.3.1",
     "tinymce": "^8.1.2",
     "vue": "^3.4.29",
     "vue-axios": "^3.5.2",
+    "vue-cropper": "next",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {

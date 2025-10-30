@@ -1,24 +1,18 @@
 <script setup>
 import { reactive, ref, inject } from 'vue'
 import { ElMessageBox } from 'element-plus'
-//发布文章
+import { useStore } from '@/stores/my'
+import Editor from '@tinymce/tinymce-vue'
+import { useRouter } from 'vue-router'
+import { undefine, nullZeroBlank } from "@/js/tool.js"
+
+const router = useRouter()
+const store = useStore()
+let type = "add"
+const header = ref("发布文章")
+
 const axios = inject('axios')
-function publishArticle() {
-  console.log('准备发送的数据:', article)
-  axios({
-    method: 'post',
-    url: '/api/article/publishArticle',
-    data: article,
-    timeout: 300000
-  }).then((response) => {
-    ElMessageBox.alert(response.data, '结果', {
-      
-    }).catch(err => {
-    console.error('请求失败:', err)
-    ElMessageBox.alert('网络错误或服务不可用', '错误')
-  })
-  })
-}
+
 //上传图片
 const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
@@ -51,70 +45,114 @@ const image_upload_handler = (blobInfo, progress) => new Promise((resolve, rejec
 
   xhr.send(formData);
 });
-// 引入TinyMCE
-import Editor from '@tinymce/tinymce-vue'
+
 const apiKey = ref('883llcm8huxeu6ustdkrozbff79ma9wsm8ox7fjvk3gujx0e')
-// 富文本编辑器TinyMCE的配置（json格式）
 const init = reactive({
-  language: "zh_CN", // 语言类型
+  language: "zh_CN", //语言类型
   placeholder: "在这里输入文字",
-plugins: ['image', 'code'],
-  toolbar: 'undo redo | bold italic | image code', // 正确拼写 + 更完整工具栏
-  images_file_types: 'jpg,jpeg,png,webp,svg',       // 支持常见图片格式
-  images_upload_handler: image_upload_handler,      // ✅ 修正拼写
-  convert_urls: false   
+  plugins: ['image', 'code'],
+  toolbar: 'image',
+  images_file_types: 'jpg,jpeg,png,gif,bmp',
+  images_upload_handler: image_upload_handler,
+  convert_urls: false
 })
 
+let article = reactive({ "title": "", "tags": "", "content": "", thumbnail: "" })
 
-let article = reactive({ "title": "", "tags": "", "content": "" })
+// 检查是否为编辑模式
+if (store.articleId > 0) {
+  type = "edit"
+  header.value = "编辑文章"
+  axios({
+    method: 'post',
+    url: '/api/article/selectById?id=' + store.articleId
+  }).then((response) => {
+    if (response.data.success) {
+      let nowArticle = response.data.map.article
+      article.id = nowArticle.id
+      article.title = nowArticle.title
+      article.tags = nowArticle.tags
+      article.content = nowArticle.content
+      article.thumbnail = nowArticle.thumbnail
+    } else {
+      ElMessageBox.alert(response.data.msg, '结果')
+    }
+    store.articleId = 0
+  }).catch((error) => {
+    ElMessageBox.alert("系统错误！", '结果')
+    store.articleId = 0
+  })
+}
+
+function publishArticle() {
+  let url = '/api/article/publishArticle';
+  let type = 'add';
+  
+  // 检查是否为编辑模式
+  if (article.id) {
+    type = 'edit';
+  }
+  
+  //发送axios的post请求，经过反向代理，最终访问http://localhost:8080/article/publishArticle
+  axios({
+    method: 'post',
+    url: url + '?type=' + type,
+    data: article,
+    timeout: 3000000
+  }).then((response) => {
+    //response.data代表后端服务器返回的json格式的数据
+    ElMessageBox.alert(response.data, '结果')
+    if(  "添加成功！"==response.data){
+      clearData()//清空数据
+      window.scrollTo(0, 0)//滚动到顶端    
+    }
+  }).catch((error) => {
+    ElMessageBox.alert("系统错误！", '结果')
+  })
+}
+
+function clearData() {
+  article.title = ""
+  article.tags = ""
+  article.content = ""
+  article.thumbnail = ""
+}
+
+function gotoArticleManage() {
+  router.push({ name: 'manageArticle' })
+}
 </script>
 
 <template>
   <el-row>
     <el-col :span="24">
-      <h4>发布文章</h4>
+      <h4>{{ header }}</h4>
     </el-col>
   </el-row>
   <el-row>
     <el-col :span="12">
       <el-input v-model="article.title" placeholder="请输入文章标题（必须）" clearable />
     </el-col>
-    <!-- 将文本框内容和article的title属性进行双向绑定 -->
-
     <el-col :span="12">
       <el-input v-model="article.tags" :rows="1" type="textarea" placeholder="请输入文章标签,可以多行" />
     </el-col>
   </el-row>
   <el-row>
     <el-col :span="24">
-    </el-col>
-  </el-row>
-  <!-- <el-row>
-    <el-col :span="24">
-      <div align="right">
-        <el-button>返回列表</el-button>
-        <el-button type="primary" @click="publishArticle">保存文章</el-button>
-      </div>
-    </el-col>
-  </el-row> -->
-    <el-row>
-    <el-col :span="24">
-      <!-- 响应式变量的属性和富文本编辑器的内容（用户输入）双向绑定 -->
       <div id="editor">
-        <editor v-model="article.content" :init="init" :api-key="apiKey"/>
+        <editor v-model="article.content" :init="init" :api-key="apiKey" />
       </div>
     </el-col>
   </el-row>
   <el-row>
     <el-col :span="24">
       <div align="right">
-        <el-button>返回列表</el-button>
+        <el-button @click="gotoArticleManage">返回列表</el-button>
         <el-button type="primary" @click="publishArticle">保存文章</el-button>
       </div>
     </el-col>
   </el-row>
 </template>
-
 
 <style scoped>
 </style>

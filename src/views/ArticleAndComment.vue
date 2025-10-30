@@ -3,7 +3,7 @@ import Top from "@/components/Top.vue";
 import Comment from "@/components/Comment.vue";
 import { useRoute } from 'vue-router';
 import { inject, reactive, ref } from 'vue';
-import { ElMessageBox, ElInput, ElButton, ElCard, ElRow, ElCol, ElForm, ElFormItem } from 'element-plus';
+import { ElMessageBox, ElInput, ElButton, ElCard, ElRow, ElCol } from 'element-plus';
 
 const route = useRoute();
 const axios = inject('axios');
@@ -14,11 +14,7 @@ let articleAndComment = reactive({
 });
 
 // 添加评论相关数据
-const newComment = ref({
-  articleId: route.params.articleId,
-  content: '',
-  author: ''
-});
+const commentContent = ref('')
 
 // 获取文章和评论
 axios({
@@ -40,30 +36,31 @@ axios({
 
 // 提交评论的方法
 const submitComment = () => {
-  if (!newComment.value.content.trim()) {
+  if (!commentContent.value.trim()) {
     ElMessageBox.alert('评论内容不能为空！', '提示');
     return;
   }
-  if (!newComment.value.author.trim()) {
-    ElMessageBox.alert('请输入您的姓名！', '提示');
-    return;
-  }
 
-  // 更新文章ID
-  newComment.value.articleId = route.params.articleId;
+  const commentData = {
+    articleId: route.params.articleId,
+    content: commentContent.value,
+    author: '匿名用户' // 默认匿名用户
+  };
 
   axios({
     method: 'post',
     url: '/api/comment/add',
-    data: newComment.value
+    data: commentData
   }).then((response) => {
     if (response.data.success) {
-      ElMessageBox.alert('评论提交成功！', '提示');
-      // 清空输入框
-      newComment.value.content = '';
-      newComment.value.author = '';
-      // 重新加载评论列表，确保数据同步
-      reloadComments();
+      ElMessageBox.alert('评论提交成功！', '提示', {
+        confirmButtonText: '确定',
+        callback: () => {
+          commentContent.value = '';
+          // 重新加载评论列表，确保数据同步
+          reloadComments();
+        }
+      });
     } else {
       ElMessageBox.alert(response.data.msg || '评论提交失败！', '提示');
     }
@@ -111,22 +108,20 @@ const reloadComments = () => {
         <!-- 发表评论区域 -->
         <div class="comment-form-area">
           <el-card class="comment-card">
-            <h3>发表评论</h3>
-            <el-form label-position="top">
-              <el-form-item label="昵称">
-                <el-input v-model="newComment.author" placeholder="请输入昵称" />
-              </el-form-item>
-              <el-form-item label="评论内容">
-                <el-input
-                  v-model="newComment.content"
-                  type="textarea"
-                  :rows="4"
+            <el-row>
+              <el-col>
+                <el-input 
+                  v-model="commentContent" 
+                  :autosize="{ minRows: 4 }"
+                  type="textarea" 
                   placeholder="请输入评论内容..." />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="submitComment" class="submit-btn">发布</el-button>
-              </el-form-item>
-            </el-form>
+              </el-col>
+            </el-row>
+            <el-row justify="end" style="margin-top: 15px;">
+              <el-col :xs="8" :sm="6" :md="4">
+                <el-button @click="submitComment" type="primary" round>提交评论</el-button>
+              </el-col>
+            </el-row>
           </el-card>
         </div>
         
@@ -162,12 +157,6 @@ const reloadComments = () => {
 
 .comment-card {
   padding: 20px;
-}
-
-.submit-btn {
-  background-color: #409EFF;
-  border-color: #409EFF;
-  color: white;
 }
 
 .comments-list {

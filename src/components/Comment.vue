@@ -18,7 +18,7 @@ const props = defineProps(['comment'])
   </el-row>
   <el-row style="margin-bottom:10px" justify="end">
     <el-col :span="3">
-      <div class="comment-time">{{ props.comment.createTime || props.comment.create_time || '未知时间' }}</div>
+      <div class="comment-time">{{ props.comment.created || props.comment.createTime || props.comment.create_time || '未知时间' }}</div>
     </el-col>
   </el-row>
 </template>

@@ -60,7 +60,7 @@ function toggleCollapse() {
                 </span>
               </el-menu-item>
               <!-- 文章管理  -->
-              <el-menu-item class="text" index="/admin_Main/edit_article">
+              <el-menu-item class="text" index="/admin_Main/manage_article">
                 <el-icon>
                   <Memo />
                 </el-icon>

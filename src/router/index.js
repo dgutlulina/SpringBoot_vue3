@@ -24,9 +24,9 @@ const router = createRouter({
           component: () => import("../views/admin/PublishArticle.vue"),
         },
         {
-          path: "edit_article",
-          name: "editArticle",
-          component: () => import("../views/admin/EditArticle.vue"),
+          path: "manage_article",
+          name: "manageArticle",
+          component: () => import("../views/admin/ManageArticle.vue"),
         },
         {
           path: "comment",

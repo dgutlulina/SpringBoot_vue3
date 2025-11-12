@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import { createPinia, defineStore } from 'pinia'; 
 import { ref, reactive } from 'vue'; 
 
@@ -24,7 +25,9 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(router);
-app.use(ElementPlus);
+app.use(ElementPlus, {
+  locale: zhCn,
+});
 app.use(pinia); 
 
 // 引入 axios 和 vue-axios

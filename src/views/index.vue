@@ -93,16 +93,22 @@ onBeforeRouteLeave((to, from) => {
     <el-col :span="14">
       <el-row>
         <el-col>
-          <template v-for="article in data.articles">
-            <ArticleHeader :article="article" />
+          <template v-for="article in data.articles" >
+            <ArticleHeader :article="article" style="border-bottom: 1px solid #eee;padding: 20px;"/>
           </template>
         </el-col>
       </el-row>
       <el-row>
         <el-col>
-          <el-pagination v-model:current-page="data.pageParams.page" v-model:page-size="data.pageParams.rows"
+          <el-pagination 
+          v-model:current-page="data.pageParams.page" 
+          v-model:page-size="data.pageParams.rows"
             layout="prev, pager, next" :total="data.pageParams.total" @current-change="handleCurrentChange"
-            :pager-count="7" />
+            :pager-count="7" 
+            background="true"
+            :size="lg"
+            style="padding-top:50px ;"
+            />
         </el-col>
       </el-row>
 

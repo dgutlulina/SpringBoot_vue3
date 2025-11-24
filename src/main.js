@@ -37,5 +37,9 @@ app.use(VueAxios, axios);
 app.provide('axios', app.config.globalProperties.axios);
 app.component('font-awesome-icon', FontAwesomeIcon);
 
+import VueCropper from 'vue-cropper';
+import 'vue-cropper/dist/index.css'
+app.use(VueCropper);
+
 // 挂载应用
 app.mount('#app');

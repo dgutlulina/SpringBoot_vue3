@@ -7,6 +7,12 @@ import { useRouter } from 'vue-router'
 import Cropper from "@/components/Cropper.vue";
 import { undefine, nullZeroBlank } from "@/js/tool.js"
 
+const updateThumbnail = (url) => {
+  console.log('更新缩略图URL:', url) // 添加日志以便调试
+  article.thumbnail = url
+}
+provide('updateThumbnail', updateThumbnail)
+
 const router = useRouter()
 const store = useStore()
 let type = "add"
@@ -79,6 +85,8 @@ if (store.articleId > 0) {
       article.content = nowArticle.content
       article.thumbnail = nowArticle.thumbnail
       
+      console.log('加载文章数据，thumbnail值为:', article.thumbnail) // 添加调试日志
+      
       // 如果是编辑模式且有缩略图，则设置Cropper组件
       if(!undefine(article.thumbnail) 
           && !nullZeroBlank(article.thumbnail)
@@ -107,29 +115,45 @@ function freshCropper() {
 provide("freshCropper", freshCropper)
 
 function publishArticle() {
-  // 获取Cropper组件的缩略图
-  let thumbnail = cropper1.value.getThumbnail()
-  if (undefine(thumbnail) || nullZeroBlank(thumbnail) 
-            || thumbnail.indexOf("/api") != 0) {
-    article.thumbnail = ""
+  console.log('发布文章前的thumbnail值:', article.thumbnail) // 添加调试日志
+  
+  // 处理缩略图，确保合法的URL被保存
+  if (
+    article.thumbnail &&
+    !undefine(article.thumbnail) &&
+    !nullZeroBlank(article.thumbnail) &&
+    article.thumbnail.startsWith("/api")
+  ) {
+    // 合法，保留原值
+    console.log('使用上传的缩略图') // 添加调试日志
+  } else if (
+    article.thumbnail &&
+    !undefine(article.thumbnail) &&
+    !nullZeroBlank(article.thumbnail)
+  ) {
+    // 不以/api开头但也非空，可能是完整URL，也保留
+    console.log('使用完整URL缩略图') // 添加调试日志
   } else {
-    article.thumbnail = thumbnail
+    // 非法或为空，设为空字符串，让后端使用默认图
+    article.thumbnail = ""
+    console.log('使用默认缩略图') // 添加调试日志
   }
+
+  let url = '/api/article/publishArticle'
   
-  let url = '/api/article/publishArticle';
+  // 在发送请求前再次记录thumbnail值
+  console.log('发送到后端的thumbnail值:', article.thumbnail)
   
-  //发送axios的post请求，经过反向代理，最终访问http://localhost:8080/article/publishArticle
   axios({
     method: 'post',
     url: url + '?type=' + type,
     data: article,
     timeout: 3000000
   }).then((response) => {
-    //response.data代表后端服务器返回的json格式的数据
     ElMessageBox.alert(response.data, '结果')
-    if("添加成功！"==response.data){
-      clearData()//清空数据
-      window.scrollTo(0, 0)//滚动到顶端    
+    if ("添加成功！" === response.data) {
+      clearData()
+      window.scrollTo(0, 0)
     }
   }).catch((error) => {
     ElMessageBox.alert("系统错误！", '结果')
@@ -141,7 +165,9 @@ function clearData() {
   article.tags = ""
   article.content = ""
   article.thumbnail = ""
-  cropper1.value.clearData()//清空子组件（剪裁图片）数据
+  if (cropper1.value) {
+    cropper1.value.clearData()//清空子组件（剪裁图片）数据
+  }
 }
 
 function gotoArticleManage() {

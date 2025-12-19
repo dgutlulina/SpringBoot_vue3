@@ -4,9 +4,11 @@ import Comment from "@/components/Comment.vue";
 import { useRoute } from 'vue-router';
 import { inject, reactive, ref } from 'vue';
 import { ElMessageBox, ElInput, ElButton, ElCard, ElRow, ElCol } from 'element-plus';
+import { useStore } from '@/stores/my';
 
 const route = useRoute();
 const axios = inject('axios');
+const store = useStore();
 
 let articleAndComment = reactive({
   "article": {"content": ""},
@@ -49,7 +51,7 @@ const submitComment = () => {
 
   axios({
     method: 'post',
-    url: '/api/comment/add',
+    url: '/api/comment/insert',
     data: commentData
   }).then((response) => {
     if (response.data.success) {
@@ -89,6 +91,11 @@ const reloadComments = () => {
     }
   });
 };
+const canComment = ref(false)//是否显示评论
+// 修改条件判断，允许所有登录用户（包括管理员）显示评论区
+if(store.user && store.user!=null){
+  canComment.value=true
+}
 </script>
 
 <template>
@@ -106,7 +113,7 @@ const reloadComments = () => {
     <el-col :span="14" :offset="5">
       <div class="comments-container">
         <!-- 发表评论区域 -->
-        <div class="comment-form-area">
+        <div class="comment-form-area" v-if="canComment">
           <el-card class="comment-card">
             <el-row>
               <el-col>

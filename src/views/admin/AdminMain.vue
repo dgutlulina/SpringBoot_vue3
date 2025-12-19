@@ -1,8 +1,10 @@
 <script setup>
 import { Odometer, Edit, Memo, Comment, Filter, Setting } from '@element-plus/icons-vue';
-import { reactive } from 'vue'
+import { reactive, inject } from 'vue'
 import { Fold, Expand, View, DArrowRight } from '@element-plus/icons-vue'
 import { RouterView } from 'vue-router';
+
+const toHome = inject("toHome")
 
 const asideState = reactive({
   collapse: false, // false=展开，true=收缩
@@ -93,6 +95,16 @@ function toggleCollapse() {
                 </el-icon>
                 <span>
                   系统设置
+                </span>
+              </el-menu-item>
+              
+              <!-- 返回首页 -->
+              <el-menu-item class="text" @click="toHome">
+                <el-icon>
+                  <View />
+                </el-icon>
+                <span>
+                  返回首页
                 </span>
               </el-menu-item>
 

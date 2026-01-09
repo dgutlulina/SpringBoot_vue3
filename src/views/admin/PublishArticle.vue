@@ -1,6 +1,6 @@
 <script setup>
-import { reactive, ref, inject, provide, nextTick } from 'vue'
-import { ElMessageBox } from 'element-plus'
+import { reactive, ref, inject, provide, nextTick, computed } from 'vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import { useStore } from '@/stores/my'
 import Editor from '@tinymce/tinymce-vue'
 import { useRouter } from 'vue-router'
@@ -18,8 +18,10 @@ const store = useStore()
 let type = "add"
 const header = ref("发布文章")
 
-const axios = inject('axios')
+// 计算属性：用户是否已认证
+const isAuthenticated = computed(() => !!store.user && !!store.user.id)
 
+const axios = inject('axios')
 //上传图片
 const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
@@ -115,6 +117,13 @@ function freshCropper() {
 provide("freshCropper", freshCropper)
 
 function publishArticle() {
+  // 检查用户是否已登录
+  if (!isAuthenticated.value) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  
   console.log('发布文章前的thumbnail值:', article.thumbnail) // 添加调试日志
   
   // 处理缩略图，确保合法的URL被保存

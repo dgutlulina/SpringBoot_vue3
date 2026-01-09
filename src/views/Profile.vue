@@ -92,7 +92,7 @@
           >
             <el-table-column prop="title" label="标题" />
             <el-table-column prop="summary" label="摘要" />
-            <el-table-column prop="createdAt" label="创建时间" :formatter="dateFormat" />
+            <el-table-column prop="created" label="创建时间" :formatter="dateFormatTable" />
             <el-table-column prop="likes" label="点赞数" />
             <el-table-column prop="favorites" label="收藏数" />
             <el-table-column label="操作">
@@ -598,14 +598,34 @@ const viewPost = (postId) => {
 
 // 日期格式化函数，处理帖子时间
 const formatDate = (post) => {
-  if (!post || !post.createdAt) return ''
+  if (!post) return ''
   
-  const date = new Date(post.createdAt)
+  // 尝试多种可能的时间字段名
+  let dateValue = post.createdAt || post.created || post.created_at || post.createTime
+  
+  if (!dateValue) return ''
+  
+  const date = new Date(dateValue)
+  if (isNaN(date.getTime())) return '' // 检查日期是否有效
+  
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
   })
+}
+
+// 日期格式化函数，用于表格显示
+const dateFormatTable = (row, column, cellValue) => {
+  if (!cellValue) return ''
+  
+  // 如果是Date对象，直接格式化
+  if (cellValue instanceof Date) {
+    return dateFormat(cellValue, 'yyyy-MM-dd')
+  }
+  
+  // 如果是字符串，尝试格式化
+  return dateFormat(cellValue, 'yyyy-MM-dd')
 }
 
 // 返回首页方法

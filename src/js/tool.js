@@ -28,7 +28,7 @@ function dateFormat(dateString, format){
     let date=new Date(dateString)
     if("yyyy-MM-dd"===format){
       let dateFormat=date.getFullYear()+"-";
-      dateFormat+=date.getMonth()+"-";
+      dateFormat+=(date.getMonth()+1)+"-"; // 月份需要加1，因为getMonth返回0-11
       dateFormat+=date.getDate();
       return dateFormat
     }else{

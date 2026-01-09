@@ -583,17 +583,17 @@ const handleFavoritesCurrentChange = (page) => {
 // 其他功能方法
 const createNewPost = () => {
   // 跳转到发布文章页面
-  window.location.href = '/admin_Main/publish_article'
+  router.push('/publish_article')
 }
 
 const editPost = (post) => {
   // 跳转到编辑文章页面
-  window.location.href = `/admin_Main/publish_article?id=${post.id}`
+  router.push(`/publish_article?id=${post.id}`)
 }
 
 const viewPost = (postId) => {
   // 跳转到文章详情页
-  window.location.href = `/article_comment/${postId}`
+  router.push(`/article_comment/${postId}`)
 }
 
 // 日期格式化函数，处理帖子时间

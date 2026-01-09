@@ -21,12 +21,13 @@ const isLiked = ref(false)
 const isFavorited = ref(false)
 
 // 计算属性：用户是否已登录
-const isAuthenticated = computed(() => !!store.user.user)
+const isAuthenticated = computed(() => store.user.user)
 
 // 初始化点赞和收藏状态
 onMounted(async () => {
+  console.log(store.user.user)
   // 添加更严格的检查，确保store.user.user和store.user.user.id都已定义
-  if (isAuthenticated.value && store.user.user && store.user.user.id) {
+  if (!isAuthenticated.value && store.user.user && store.user.user.id) {
     try {
       // 检查点赞状态
       const likeResponse = await postApi.isArticleLikedByUser(store.user.user.id, props.article.id)

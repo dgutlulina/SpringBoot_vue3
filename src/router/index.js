@@ -12,6 +12,7 @@ const router = createRouter({
       path: "/admin_Main",
       name: "adminMain",
       component: () => import("../views/admin/AdminMain.vue"),
+      redirect: '/admin_Main/',
       children: [
         {
           path: "",
@@ -44,6 +45,12 @@ const router = createRouter({
           component: () => import("../views/admin/Setting.vue"),
         },
       ],
+    },
+
+    {
+      path: "/publish_article",
+      name: "publishArticleStandalone",
+      component: () => import("../views/admin/PublishArticle.vue"),
     },
 
     {

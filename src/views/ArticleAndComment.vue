@@ -2,7 +2,7 @@
 import Top from "@/components/Top.vue";
 import Comment from "@/components/Comment.vue";
 import { useRoute } from 'vue-router';
-import { inject, reactive, ref, onMounted } from 'vue';
+import { inject, reactive, ref, onMounted, computed, watchEffect } from 'vue';
 import { ElMessageBox, ElInput, ElButton, ElCard, ElRow, ElCol, ElMessage } from 'element-plus';
 import { useStore } from '@/stores/my';
 import { postApi } from '@/js/api';
@@ -29,7 +29,7 @@ const loadingLike = ref(false)
 const loadingFavorite = ref(false)
 
 // 计算属性：是否已认证
-const isAuthenticated = ref(!!store.user.user)
+const isAuthenticated = computed(() => !!store.user && !!store.user.id)
 
 // 获取文章和评论
 axios({
@@ -41,6 +41,14 @@ axios({
     if (response.data.map.article !== null) {
       articleAndComment.article = response.data.map.article;
       articleAndComment.comments = response.data.map.comments;
+      
+      // 更新点赞和收藏状态 - 从API响应中获取状态
+      if (response.data.map.isLiked !== undefined) {
+        isLiked.value = response.data.map.isLiked;
+      }
+      if (response.data.map.isFavorited !== undefined) {
+        isFavorited.value = response.data.map.isFavorited;
+      }
     } else {
       ElMessageBox.alert("无文章！", '结果');
     }
@@ -96,6 +104,14 @@ const reloadComments = () => {
       if (response.data.map.article !== null) {
         articleAndComment.article = response.data.map.article;
         articleAndComment.comments = response.data.map.comments;
+        
+        // 更新点赞和收藏状态 - 从API响应中获取状态
+        if (response.data.map.isLiked !== undefined) {
+          isLiked.value = response.data.map.isLiked;
+        }
+        if (response.data.map.isFavorited !== undefined) {
+          isFavorited.value = response.data.map.isFavorited;
+        }
       } else {
         ElMessageBox.alert("无文章！", '结果');
       }
@@ -106,33 +122,9 @@ const reloadComments = () => {
 };
 const canComment = ref(false)//是否显示评论
 // 修改条件判断，允许所有登录用户（包括管理员）显示评论区
-if(store.user && store.user!=null){
+if(store.user && store.user.id){
   canComment.value=true
-  isAuthenticated.value = true
-}
-
-// 初始化点赞和收藏状态
-const initLikeAndFavoriteStatus = async () => {
-  if (!isAuthenticated.value) return
-  
-  const articleId = route.params.articleId
-  const userId = store.user.user.id
-  
-  try {
-    // 检查点赞状态
-    const likeResponse = await postApi.isArticleLikedByUser(userId, articleId)
-    if (likeResponse.data.success) {
-      isLiked.value = likeResponse.data.data
-    }
-    
-    // 检查收藏状态
-    const favoriteResponse = await postApi.isArticleFavoritedByUser(userId, articleId)
-    if (favoriteResponse.data.success) {
-      isFavorited.value = favoriteResponse.data.data
-    }
-  } catch (error) {
-    console.error('初始化点赞和收藏状态失败:', error)
-  }
+  // 由于isAuthenticated现在是computed，不再直接赋值
 }
 
 // 处理点赞
@@ -207,9 +199,38 @@ const handleFavorite = async () => {
   }
 }
 
-// 组件挂载后初始化
-onMounted(() => {
-  initLikeAndFavoriteStatus()
+// 使用 watchEffect 监听用户认证状态和文章ID的变化
+watchEffect(async () => {
+  // 确保用户已登录且文章ID存在
+  if (isAuthenticated.value && store.user.id && route.params.articleId) {
+    try {
+      const articleId = route.params.articleId;
+      // 检查点赞状态
+      const likeResponse = await postApi.isArticleLikedByUser(store.user.id, articleId)
+      if (likeResponse.data.success) {
+        // 根据 msg 字段判断点赞状态
+        isLiked.value = likeResponse.data.msg === '已点赞'
+      } else {
+        console.error('获取点赞状态失败:', likeResponse.data.msg)
+      }
+      
+      // 检查收藏状态
+      const favoriteResponse = await postApi.isArticleFavoritedByUser(store.user.id, articleId)
+      if (favoriteResponse.data.success) {
+        // 根据 msg 字段判断收藏状态
+        isFavorited.value = favoriteResponse.data.msg === '已收藏'
+      } else {
+        console.error('获取收藏状态失败:', favoriteResponse.data.msg)
+      }
+    } catch (error) {
+      console.error('初始化点赞和收藏状态失败:', error)
+    }
+  } else {
+    // 用户未登录或文章ID不存在时，重置状态
+    isLiked.value = false
+    isFavorited.value = false
+    console.log('用户未登录或文章ID未定义，重置点赞收藏状态')
+  }
 })
 </script>
 

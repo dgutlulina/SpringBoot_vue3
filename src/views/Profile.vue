@@ -317,7 +317,7 @@ const savingProfile = ref(false)
 const profileFormRef = ref(null)
 
 // 计算属性：是否已认证
-const isAuthenticated = computed(() => !!store.user.user)
+const isAuthenticated = computed(() => !!store.user && !!store.user.id)
 
 // 计算属性：认证头
 const authHeaders = computed(() => {
@@ -340,7 +340,7 @@ const handleTabSelect = (index) => {
       loadUserPosts()
       break
     case 'liked':
-      if (isAuthenticated.value && store.user.user.id) {
+      if (isAuthenticated.value && store.user.id) {
         loadLikedPosts()
       } else {
         console.error('加载点赞帖子失败：用户未登录或用户ID未定义')
@@ -348,7 +348,7 @@ const handleTabSelect = (index) => {
       }
       break
     case 'favorites':
-      if (isAuthenticated.value && store.user.user.id) {
+      if (isAuthenticated.value && store.user.id) {
         loadFavoritePosts()
       } else {
         console.error('加载收藏帖子失败：用户未登录或用户ID未定义')
@@ -626,7 +626,7 @@ onMounted(async () => {
       userInfo.avatar = userData.avatar || ''
       
       // 更新store中的用户信息，以便其他组件使用
-      store.user.user = userData
+      Object.assign(store.user, userData)
     } else {
       console.error('获取用户信息失败：响应数据格式不正确')
     }

@@ -14,11 +14,11 @@ const isLogined = ref(false);
 const isAdmin = ref(false);
 
 // 安全地检查用户是否已登录
-if(store && store.user && store.user.user !== null) {
-  username.value="hi！ "+store.user.user?.username
+if(store && store.user && store.user.id) {
+  username.value="hi！ "+store.user?.username
   isLogined.value=true
   // 检查是否是管理员
-  if (store.user.user?.authorities && store.user.user?.authorities[0] === "ROLE_admin") {
+  if (store.user?.authorities && store.user?.authorities[0] === "ROLE_admin") {
     isAdmin.value = true;
   }
 }

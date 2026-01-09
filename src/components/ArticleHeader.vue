@@ -21,30 +21,41 @@ const isLiked = ref(false)
 const isFavorited = ref(false)
 
 // 计算属性：用户是否已登录
-const isAuthenticated = computed(() => store.user.user)
+const isAuthenticated = computed(() => !!store.user && !!store.user.id)
 
 // 初始化点赞和收藏状态
-onMounted(async () => {
-  console.log(store.user.user)
-  // 添加更严格的检查，确保store.user.user和store.user.user.id都已定义
-  if (!isAuthenticated.value && store.user.user && store.user.user.id) {
+import { watchEffect } from 'vue'
+
+// 使用 watchEffect 监听用户认证状态和文章ID的变化
+watchEffect(async () => {
+  // 确保用户已登录且文章ID存在
+  if (isAuthenticated.value && store.user.id && props.article?.id) {
     try {
       // 检查点赞状态
-      const likeResponse = await postApi.isArticleLikedByUser(store.user.user.id, props.article.id)
+      const likeResponse = await postApi.isArticleLikedByUser(store.user.id, props.article.id)
       if (likeResponse.data.success) {
-        isLiked.value = likeResponse.data.data
+        // 根据 msg 字段判断点赞状态
+        isLiked.value = likeResponse.data.msg === '已点赞'
+      } else {
+        console.error('获取点赞状态失败:', likeResponse.data.msg)
       }
       
       // 检查收藏状态
-      const favoriteResponse = await postApi.isArticleFavoritedByUser(store.user.user.id, props.article.id)
+      const favoriteResponse = await postApi.isArticleFavoritedByUser(store.user.id, props.article.id)
       if (favoriteResponse.data.success) {
-        isFavorited.value = favoriteResponse.data.data
+        // 根据 msg 字段判断收藏状态
+        isFavorited.value = favoriteResponse.data.msg === '已收藏'
+      } else {
+        console.error('获取收藏状态失败:', favoriteResponse.data.msg)
       }
     } catch (error) {
       console.error('初始化点赞收藏状态失败:', error)
     }
   } else {
-    console.log('用户未登录或用户ID未定义，无法初始化点赞收藏状态')
+    // 用户未登录或文章ID不存在时，重置状态
+    isLiked.value = false
+    isFavorited.value = false
+    console.log('用户未登录或文章ID未定义，重置点赞收藏状态')
   }
 })
 

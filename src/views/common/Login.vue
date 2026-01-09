@@ -48,7 +48,7 @@ const submitForm = async (formEl) => {
             
             // 确保store.user存在后再设置其属性
             if(store.user) {
-              store.user.user = response.data.map.data
+              Object.assign(store.user, response.data.map.data)
             } else {
               // 如果store.user不存在，使用$patch方法初始化整个store
               store.$patch({

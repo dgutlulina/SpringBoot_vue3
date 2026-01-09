@@ -9,7 +9,7 @@ import { ElMessageBox } from 'element-plus'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faWeibo, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { onBeforeRouteLeave } from 'vue-router'
-import { useStore } from '@/main'
+import { useStore } from '@/stores/my'
 
 const store = useStore()
 const size = ref(20)
@@ -19,7 +19,7 @@ const toArticle = inject('toArticle')
 const data = reactive({
   articles: [],
   "pageParams": {
-    "page": store.home.page,
+    "page": store.home?.page || 1,
     "rows": 5,
     "total": 0
   },
@@ -76,9 +76,25 @@ getIndexData()
 
 onBeforeRouteLeave((to, from) => {
   if (to.fullPath.indexOf("article_comment") >= 0) {
-    store.home.page = data.pageParams.page
+    // 使用安全的访问方式，确保store.home存在
+    if (store.home) {
+      store.home.page = data.pageParams.page
+    } else {
+      // 如果store.home不存在，初始化它
+      store.$patch({
+        home: { page: data.pageParams.page }
+      })
+    }
   } else {
-    store.home.page = 1
+    // 使用安全的访问方式，确保store.home存在
+    if (store.home) {
+      store.home.page = 1
+    } else {
+      // 如果store.home不存在，初始化它
+      store.$patch({
+        home: { page: 1 }
+      })
+    }
   }
   return true
 })
@@ -105,8 +121,8 @@ onBeforeRouteLeave((to, from) => {
           v-model:page-size="data.pageParams.rows"
             layout="prev, pager, next" :total="data.pageParams.total" @current-change="handleCurrentChange"
             :pager-count="7" 
-            background="true"
-            :size="lg"
+            :background="true"
+            :size="'lg'"
             style="padding-top:50px ;"
             />
         </el-col>

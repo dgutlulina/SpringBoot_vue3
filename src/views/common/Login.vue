@@ -3,6 +3,8 @@ import { reactive, ref, inject } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import qs from 'qs'
 import { useStore } from '@/stores/my'
+import { nextTick } from 'vue'
+
 const store = useStore()
 const axios = inject('axios')
 const toAdminMain = inject("toAdminMain")
@@ -42,21 +44,38 @@ const submitForm = async (formEl) => {
         data: formData
       }).then((response) => {
         if(response.data.success){
-          console.log('登录成功！欢迎 ' + response.data.map.user.username);
-          store.user = response.data.map.user
-          // 如果用户名是admin，则进入后台管理页面
-          if(response.data.map.user.username === "admin"){
-            toAdminMain()
-          } else if(response.data.map.user.authorities[0]==="ROLE_common"){
-            toHome()//普通用户跳转到主页
-          } else if (response.data.map.user.authorities[0] === "ROLE_admin") {
-            toAdminMain()//管理员用户跳转至管理页面
-          }
-        }else{
+            console.log('登录成功！欢迎 ' + response.data.map.data.username);
+            
+            // 确保store.user存在后再设置其属性
+            if(store.user) {
+              store.user.user = response.data.map.data
+            } else {
+              // 如果store.user不存在，使用$patch方法初始化整个store
+              store.$patch({
+                user: { user: response.data.map.data }
+              })
+            }
+            
+            // 使用nextTick确保状态更新后再跳转
+            nextTick(() => {
+              // 如果用户名是admin，则进入后台管理页面
+              if(response.data.map.data.username === "admin"){
+                toAdminMain()
+              } else if(response.data.map.data.authorities && response.data.map.data.authorities[0]==="ROLE_common"){
+                toHome()//普通用户跳转到主页
+              } else if (response.data.map.data.authorities && response.data.map.data.authorities[0] === "ROLE_admin") {
+                toAdminMain()//管理员用户跳转至管理页面
+              } else {
+                // 默认跳转到主页
+                toHome()
+              }
+            })
+        } else{
           ElMessageBox.alert(response.data.msg, '结果')
         }
       }).catch((error) => { //请求失败返回的数据
         ElMessageBox.alert("系统错误！", '结果')
+        console.error(error)
       })
     } else {
       ElMessageBox.alert("验证失败！", '结果')
@@ -74,7 +93,7 @@ const submitForm = async (formEl) => {
   <el-row justify="center">
     <el-col :span="8">
           <el-form ref="ruleFormRef" :model="user" status-icon
-             :rules="rules" :size="formSize" label-width=auto >
+             :rules="rules" :size="formSize" label-width="auto">
       <el-form-item label="用户名：" prop="username" >
         <el-input v-model="user.username" />
       </el-form-item>
@@ -84,15 +103,15 @@ const submitForm = async (formEl) => {
         <el-form-item >
           <el-button  style="margin-left: 80px;width: 100%;" type="primary" @click="submitForm(ruleFormRef)">登陆</el-button>
         </el-form-item>
-    </el-form>
-  </el-col>
-</el-row>
-<el-row justify="center">
-  <el-col :span="8">
-    <p style="margin-left: 200px; color: #2E2D3C">
-      2022 © Powered By <a style="color: #0e90d2">CrazyStone</a></p>
-  </el-col>
-</el-row>
+      </el-form>
+    </el-col>
+  </el-row>
+  <el-row justify="center">
+    <el-col :span="8">
+      <p style="margin-left: 200px; color: #2E2D3C">
+        2022 © Powered By <a style="color: #0e90d2">CrazyStone</a></p>
+    </el-col>
+  </el-row>
 </div>
 </template>
 <style scoped>

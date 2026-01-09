@@ -41,7 +41,7 @@ function toggleCollapse() {
                 padding-bottom: 50px;
                 width: 100%;
             " :collapse="asideState.collapse" 
-            collapse-transition="false"
+            :collapse-transition="false"
             :default-active="$route.path">
               <!-- 仪表盘  -->
               <el-menu-item class="text" index="/admin_Main">

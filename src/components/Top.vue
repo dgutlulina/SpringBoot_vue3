@@ -1,11 +1,12 @@
 <script setup>
 import { ref, inject } from "vue";
-import { Search } from "@element-plus/icons-vue";
+import { Search, User } from "@element-plus/icons-vue";
 import { useStore } from '@/stores/my';
 import { ElMessageBox } from "element-plus";
 const size = ref(30);
 const toLogin = inject("toLogin");
 const toAdminMain = inject("toAdminMain");
+const toProfile = inject("toProfile");
 
 const store = useStore();
 const username = ref("");
@@ -13,11 +14,11 @@ const isLogined = ref(false);
 const isAdmin = ref(false);
 
 // 安全地检查用户是否已登录
-if(store && store.user && store.user !== null) {
-  username.value="hi！ "+store.user.username
+if(store && store.user && store.user.user !== null) {
+  username.value="hi！ "+store.user.user?.username
   isLogined.value=true
   // 检查是否是管理员
-  if (store.user.authorities && store.user.authorities[0] === "ROLE_admin") {
+  if (store.user.user?.authorities && store.user.user?.authorities[0] === "ROLE_admin") {
     isAdmin.value = true;
   }
 }
@@ -53,6 +54,7 @@ function toExit() {
       <el-space :size="size">
         <a @click="toLogin" v-if="!isLogined">登录</a>
         <a @click="toAdminMain" v-if="isAdmin">后台管理</a>
+        <a @click="toProfile" v-if="isLogined">个人中心</a>
         <a @click="toExit" v-if="isLogined">退出</a>
         <span v-html="username"></span>
         <!-- <a @click="toAdminMain">后台管理</a> -->

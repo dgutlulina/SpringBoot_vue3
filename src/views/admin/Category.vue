@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, inject } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElInput, ElButton } from 'element-plus'
+import { CirclePlus } from '@element-plus/icons-vue'
 
 const axios = inject('axios')
 
@@ -19,12 +20,13 @@ const getAllCategories = () => {
     url: '/api/article/getAllCategories'
   }).then((response) => {
     if (response.data.success) {
-      categories.value = response.data.map.categories
+      categories.value = response.data.map.categories || []
     } else {
-      ElMessage.error(response.data.msg)
+      ElMessage.error(response.data.msg || '获取分类失败')
     }
   }).catch((error) => {
     ElMessage.error('获取分类失败')
+    console.error(error)
   })
 }
 
@@ -35,17 +37,70 @@ const getAllTags = () => {
     url: '/api/article/getAllTags'
   }).then((response) => {
     if (response.data.success) {
-      tags.value = response.data.map.tags
+      tags.value = response.data.map.tags || []
     } else {
-      ElMessage.error(response.data.msg)
+      ElMessage.error(response.data.msg || '获取标签失败')
     }
   }).catch((error) => {
     ElMessage.error('获取标签失败')
+    console.error(error)
+  })
+}
+
+// 新增分类
+const addCategory = () => {
+  if (!newCategory.value.trim()) {
+    ElMessage.warning('请输入分类名称')
+    return
+  }
+
+  axios({
+    method: 'post',
+    url: '/api/article/addOrUpdateCategory',
+    params: { category: newCategory.value.trim() }
+  }).then((response) => {
+    if (response.data.success) {
+      ElMessage.success('分类添加成功')
+      newCategory.value = ''
+      getAllCategories()
+    } else {
+      ElMessage.error(response.data.msg || '添加分类失败')
+    }
+  }).catch((error) => {
+    ElMessage.error('添加分类失败')
+    console.error(error)
+  })
+}
+
+// 新增标签
+const addTag = () => {
+  if (!newTag.value.trim()) {
+    ElMessage.warning('请输入标签名称')
+    return
+  }
+
+  axios({
+    method: 'post',
+    url: '/api/article/addOrUpdateTag',
+    params: { tag: newTag.value.trim() }
+  }).then((response) => {
+    if (response.data.success) {
+      ElMessage.success('标签添加成功')
+      newTag.value = ''
+      getAllTags()
+    } else {
+      ElMessage.error(response.data.msg || '添加标签失败')
+    }
+  }).catch((error) => {
+    ElMessage.error('添加标签失败')
+    console.error(error)
   })
 }
 
 // 删除分类
 const deleteCategory = (category) => {
+  if (!category) return
+  
   axios({
     method: 'post',
     url: '/api/article/deleteCategory',
@@ -55,15 +110,18 @@ const deleteCategory = (category) => {
       ElMessage.success('分类删除成功')
       getAllCategories()
     } else {
-      ElMessage.error(response.data.msg)
+      ElMessage.error(response.data.msg || '删除分类失败')
     }
   }).catch((error) => {
     ElMessage.error('删除分类失败')
+    console.error(error)
   })
 }
 
 // 删除标签
 const deleteTag = (tag) => {
+  if (!tag) return
+  
   axios({
     method: 'post',
     url: '/api/article/deleteTag',
@@ -73,10 +131,11 @@ const deleteTag = (tag) => {
       ElMessage.success('标签删除成功')
       getAllTags()
     } else {
-      ElMessage.error(response.data.msg)
+      ElMessage.error(response.data.msg || '删除标签失败')
     }
   }).catch((error) => {
     ElMessage.error('删除标签失败')
+    console.error(error)
   })
 }
 
@@ -95,6 +154,15 @@ onMounted(() => {
           <span>分类管理</span>
         </div>
       </template>
+      <div class="input-section">
+        <el-input
+          v-model="newCategory"
+          placeholder="输入新分类名称"
+          style="width: 200px; margin-right: 10px;"
+          @keyup.enter="addCategory"
+        />
+        <el-button type="primary" @click="addCategory">添加分类</el-button>
+      </div>
       <div class="category-list">
         <el-tag
           v-for="category in categories"
@@ -117,6 +185,15 @@ onMounted(() => {
           <span>标签管理</span>
         </div>
       </template>
+      <div class="input-section">
+        <el-input
+          v-model="newTag"
+          placeholder="输入新标签名称"
+          style="width: 200px; margin-right: 10px;"
+          @keyup.enter="addTag"
+        />
+        <el-button type="primary" @click="addTag">添加标签</el-button>
+      </div>
       <div class="tag-list">
         <el-tag
           v-for="tag in tags"

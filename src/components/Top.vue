@@ -51,13 +51,12 @@ function toExit() {
       <a>个人博客</a>
     </el-col>
     <el-col :span="6">
-      <el-space :size="size">
+      <el-space :size="size" >
         <a @click="toLogin" v-if="!isLogined">登录</a>
         <a @click="toAdminMain" v-if="isAdmin">后台管理</a>
-        <a @click="toProfile" v-if="isLogined">个人中心</a>
+        <a @click="toProfile" v-if="isLogined">我的</a>
         <a @click="toExit" v-if="isLogined">退出</a>
         <span v-html="username"></span>
-        <!-- <a @click="toAdminMain">后台管理</a> -->
         <router-link title="查询" :to="{ path: '/search' }" style="text-decoration: none;">
           <el-icon>
             <Search class="searchIcon"/>

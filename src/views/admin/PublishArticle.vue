@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, inject, provide, nextTick, computed } from 'vue'
+import { reactive, ref, inject, provide, nextTick, computed, onMounted } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useStore } from '@/stores/my'
 import Editor from '@tinymce/tinymce-vue'
@@ -22,6 +22,45 @@ const header = ref("发布文章")
 const isAuthenticated = computed(() => !!store.user && !!store.user.id)
 
 const axios = inject('axios')
+
+// 分类和标签相关数据
+const categories = ref([])
+const tags = ref([])
+
+// 获取所有分类
+const getAllCategories = () => {
+  axios({
+    method: 'post',
+    url: '/api/article/getAllCategories'
+  }).then((response) => {
+    if (response.data.success) {
+      categories.value = response.data.map.categories || []
+    } else {
+      ElMessage.error(response.data.msg || '获取分类失败')
+    }
+  }).catch((error) => {
+    ElMessage.error('获取分类失败')
+    console.error(error)
+  })
+}
+
+// 获取所有标签
+const getAllTags = () => {
+  axios({
+    method: 'post',
+    url: '/api/article/getAllTags'
+  }).then((response) => {
+    if (response.data.success) {
+      tags.value = response.data.map.tags || []
+    } else {
+      ElMessage.error(response.data.msg || '获取标签失败')
+    }
+  }).catch((error) => {
+    ElMessage.error('获取标签失败')
+    console.error(error)
+  })
+}
+
 //上传图片
 const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
@@ -66,7 +105,7 @@ const init = reactive({
   convert_urls: false
 })
 
-let article = reactive({ "title": "", "tags": "", "content": "", thumbnail: "" })
+let article = reactive({ "title": "", "categories": "", "tags": "", "content": "", thumbnail: "" })
 
 const cropper1 = ref(null)
 let isShowCropper = ref(true)
@@ -95,7 +134,8 @@ if (articleIdToLoad > 0) {
       let nowArticle = response.data.map.article
       article.id = nowArticle.id
       article.title = nowArticle.title
-      article.tags = nowArticle.tags
+      article.categories = nowArticle.categories || ''
+      article.tags = nowArticle.tags || ''
       article.content = nowArticle.content
       article.thumbnail = nowArticle.thumbnail
       
@@ -189,6 +229,7 @@ function publishArticle() {
 
 function clearData() {
   article.title = ""
+  article.categories = ""
   article.tags = ""
   article.content = ""
   article.thumbnail = ""
@@ -200,6 +241,12 @@ function clearData() {
 function gotoArticleManage() {
   router.push({ name: 'manageArticle' })
 }
+
+// 组件挂载时获取分类和标签
+onMounted(() => {
+  getAllCategories()
+  getAllTags()
+})
 </script>
 
 <template>
@@ -208,11 +255,21 @@ function gotoArticleManage() {
       <h4>{{ header }}</h4>
     </el-col>
   </el-row>
-  <el-row>
+  <el-row :gutter="20">
     <el-col :span="12">
       <el-input v-model="article.title" placeholder="请输入文章标题（必须）" clearable />
     </el-col>
-    <el-col :span="12">
+    <el-col :span="6">
+      <el-select v-model="article.categories" placeholder="请选择分类" clearable filterable style="width: 100%">
+        <el-option
+          v-for="category in categories"
+          :key="category"
+          :label="category"
+          :value="category"
+        />
+      </el-select>
+    </el-col>
+    <el-col :span="6">
       <el-input v-model="article.tags" :rows="1" type="textarea" placeholder="请输入文章标签,可以多行" />
     </el-col>
   </el-row>

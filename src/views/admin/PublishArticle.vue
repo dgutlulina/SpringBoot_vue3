@@ -3,7 +3,7 @@ import { reactive, ref, inject, provide, nextTick, computed } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useStore } from '@/stores/my'
 import Editor from '@tinymce/tinymce-vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Cropper from "@/components/Cropper.vue";
 import { undefine, nullZeroBlank } from "@/js/tool.js"
 
@@ -71,13 +71,25 @@ let article = reactive({ "title": "", "tags": "", "content": "", thumbnail: "" }
 const cropper1 = ref(null)
 let isShowCropper = ref(true)
 
-// 检查是否为编辑模式
-if (store.articleId > 0) {
+// 检查是否为编辑模式 - 支持URL参数和store
+const route = useRoute()
+let articleIdToLoad = 0
+
+// 首先检查URL参数中是否有文章ID
+const urlArticleId = route.query.id
+if (urlArticleId) {
+  articleIdToLoad = parseInt(urlArticleId)
+} else if (store.articleId > 0) {
+  // 如果URL参数中没有，则检查store中的ID
+  articleIdToLoad = store.articleId
+}
+
+if (articleIdToLoad > 0) {
   type = "edit"
   header.value = "编辑文章"
   axios({
     method: 'post',
-    url: '/api/article/selectById?id=' + store.articleId
+    url: '/api/article/getArticleById?id=' + articleIdToLoad
   }).then((response) => {
     if (response.data.success) {
       let nowArticle = response.data.map.article
@@ -98,10 +110,16 @@ if (store.articleId > 0) {
     } else {
       ElMessageBox.alert(response.data.msg, '结果')
     }
-    store.articleId = 0
+    // 清除store中的ID，避免重复使用
+    if (store.articleId > 0) {
+      store.articleId = 0
+    }
   }).catch((error) => {
     ElMessageBox.alert("系统错误！", '结果')
-    store.articleId = 0
+    // 清除store中的ID，避免重复使用
+    if (store.articleId > 0) {
+      store.articleId = 0
+    }
   })
 }
 

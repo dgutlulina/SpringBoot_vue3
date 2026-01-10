@@ -91,10 +91,9 @@
             style="width: 100%"
           >
             <el-table-column prop="title" label="标题" />
-            <el-table-column prop="summary" label="摘要" />
+            <el-table-column prop="categories" label="分类" />
             <el-table-column prop="created" label="创建时间" :formatter="dateFormatTable" />
-            <el-table-column prop="likes" label="点赞数" />
-            <el-table-column prop="favorites" label="收藏数" />
+            <el-table-column prop="hits" label="浏览量" />
             <el-table-column label="操作">
               <template #default="scope">
                 <el-button size="small" @click="editPost(scope.row)">编辑</el-button>

@@ -426,7 +426,8 @@ const updatePassword = async () => {
     
     const response = await userApi.updatePassword({
       oldPassword: passwordForm.oldPassword,
-      newPassword: passwordForm.newPassword
+      newPassword: passwordForm.newPassword,
+      confirmPassword: passwordForm.confirmPassword
     })
     
     if (response.data.success) {

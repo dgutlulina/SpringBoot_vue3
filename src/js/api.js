@@ -65,7 +65,16 @@ export const userApi = {
   },
   
   // 更新密码
-  updatePassword: (data) => apiClient.post('/profile/password', data),
+  updatePassword: (data) => {
+    // 将前端的confirmPassword字段名转换为后端需要的confirmNewPassword
+    const transformedData = {
+      oldPassword: data.oldPassword,
+      newPassword: data.newPassword,
+      confirmNewPassword: data.confirmPassword
+    };
+    console.log(transformedData)
+    return apiClient.post('/profile/password', transformedData);
+  },
   
   // 删除账户
   deleteUser: () => apiClient.delete('/profile'),

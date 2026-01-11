@@ -79,28 +79,28 @@ export const userApi = {
   // 删除账户
   deleteUser: () => apiClient.delete('/profile'),
   
-  // 获取我的帖子
+  // 获取我的文章
   getMyArticles: (params) => apiClient.post('/profile/articles', params),
   
-  // 获取我喜欢的帖子
+  // 获取我喜欢的文章
   getLikedArticles: (params) => apiClient.post('/profile/liked-articles', params),
   
   // 获取我的收藏
   getFavoritedArticles: (params) => apiClient.post('/profile/favorited-articles', params),
 };
 
-// 帖子相关API
+// 文章相关API
 export const postApi = {
-  // 获取用户发布的帖子
+  // 获取用户发布的文章
   getUserPosts: (userId, params) => apiClient.post(`/article/getUserArticles`, params, { params: { userId } }),
   
-  // 获取用户点赞的帖子
+  // 获取用户点赞的文章
   getLikedPosts: (userId, params) => apiClient.post(`/article/getUserLikedArticles`, params, { params: { userId } }),
   
-  // 获取用户收藏的帖子
+  // 获取用户收藏的文章
   getFavoritePosts: (userId, params) => apiClient.post(`/article/getUserFavoritedArticles`, params, { params: { userId } }),
   
-  // 删除帖子
+  // 删除文章
   deletePost: (postId) => apiClient.post(`/article/deleteById`, { id: postId }),
   
   // 点赞相关

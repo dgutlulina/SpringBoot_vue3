@@ -15,7 +15,7 @@
           @select="handleTabSelect"
         >
           <el-menu-item index="profile">个人资料</el-menu-item>
-          <el-menu-item index="posts">我的帖子</el-menu-item>
+          <el-menu-item index="posts">我的文章</el-menu-item>
           <el-menu-item index="liked">我喜欢的</el-menu-item>
           <el-menu-item index="favorites">我的收藏</el-menu-item>
         </el-menu>
@@ -78,11 +78,11 @@
           </div>
         </div>
         
-        <!-- 我的帖子标签页 -->
+        <!-- 我的文章标签页 -->
         <div v-if="activeTab === 'posts'" class="posts-tab">
-          <h2>我的帖子</h2>
+          <h2>我的文章</h2>
           <div class="posts-controls">
-            <el-button type="primary" @click="createNewPost">发布新帖子</el-button>
+            <el-button type="primary" @click="createNewPost">发布新文章</el-button>
           </div>
           
           <el-table
@@ -115,12 +115,12 @@
           />
         </div>
         
-        <!-- 我喜欢的帖子标签页 -->
+        <!-- 我喜欢的文章标签页 -->
         <div v-if="activeTab === 'liked'" class="liked-tab">
-          <h2>我喜欢的帖子</h2>
+          <h2>我喜欢的文章</h2>
           
           <div v-if="likedPosts.length === 0 && !loadingLiked" class="no-data">
-            <p>暂无点赞的帖子</p>
+            <p>暂无点赞的文章</p>
           </div>
           <div v-else class="posts-list">
             <el-card 
@@ -157,12 +157,12 @@
           />
         </div>
         
-        <!-- 我的收藏标签页 -->
+        <!-- 我收藏的文章标签页 -->
         <div v-if="activeTab === 'favorites'" class="favorites-tab">
-          <h2>我的收藏</h2>
+          <h2>我收藏的文章</h2>
           
           <div v-if="favoritePosts.length === 0 && !loadingFavorites" class="no-data">
-            <p>暂无收藏的帖子</p>
+            <p>暂无收藏的文章</p>
           </div>
           <div v-else class="posts-list">
             <el-card 
@@ -290,21 +290,21 @@ const passwordRules = reactive({
   ]
 })
 
-// 帖子相关数据
+// 文章相关数据
 const userPosts = ref([])
 const loadingPosts = ref(false)
 const postsPage = ref(1)
 const postsPageSize = ref(10)
 const postsTotal = ref(0)
 
-// 点赞的帖子
+// 点赞的文章
 const likedPosts = ref([])
 const loadingLiked = ref(false)
 const likedPage = ref(1)
 const likedPageSize = ref(10)
 const likedTotal = ref(0)
 
-// 收藏的帖子
+// 收藏的文章
 const favoritePosts = ref([])
 const loadingFavorites = ref(false)
 const favoritesPage = ref(1)
@@ -342,16 +342,16 @@ const handleTabSelect = (index) => {
       if (isAuthenticated.value && store.user.id) {
         loadLikedPosts()
       } else {
-        console.error('加载点赞帖子失败：用户未登录或用户ID未定义')
-        ElMessage.error('加载点赞帖子失败：用户未登录或用户ID未定义')
+        console.error('加载点赞文章失败：用户未登录或用户ID未定义')
+        ElMessage.error('加载点赞文章失败：用户未登录或用户ID未定义')
       }
       break
     case 'favorites':
       if (isAuthenticated.value && store.user.id) {
         loadFavoritePosts()
       } else {
-        console.error('加载收藏帖子失败：用户未登录或用户ID未定义')
-        ElMessage.error('加载收藏帖子失败：用户未登录或用户ID未定义')
+        console.error('加载收藏文章失败：用户未登录或用户ID未定义')
+        ElMessage.error('加载收藏文章失败：用户未登录或用户ID未定义')
       }
       break
   }
@@ -447,7 +447,7 @@ const updatePassword = async () => {
   }
 }
 
-// 加载用户帖子
+// 加载用户文章
 const loadUserPosts = async () => {
   if (!isAuthenticated.value) return
   
@@ -464,14 +464,14 @@ const loadUserPosts = async () => {
       postsTotal.value = response.data.map.pageParams.total || 0
     }
   } catch (error) {
-    console.error('加载用户帖子失败:', error)
-    ElMessage.error('加载帖子失败')
+    console.error('加载用户文章失败:', error)
+    ElMessage.error('加载文章失败')
   } finally {
     loadingPosts.value = false
   }
 }
 
-// 加载点赞的帖子
+// 加载点赞的文章
 const loadLikedPosts = async () => {
   if (!isAuthenticated.value) return
   
@@ -488,14 +488,14 @@ const loadLikedPosts = async () => {
       likedTotal.value = response.data.map.pageParams.total || 0
     }
   } catch (error) {
-    console.error('加载点赞帖子失败:', error)
-    ElMessage.error('加载点赞帖子失败')
+    console.error('加载点赞文章失败:', error)
+    ElMessage.error('加载点赞文章失败')
   } finally {
     loadingLiked.value = false
   }
 }
 
-// 加载收藏的帖子
+// 加载收藏的文章
 const loadFavoritePosts = async () => {
   if (!isAuthenticated.value) return
   
@@ -512,18 +512,18 @@ const loadFavoritePosts = async () => {
       favoritesTotal.value = response.data.map.pageParams.total || 0
     }
   } catch (error) {
-    console.error('加载收藏帖子失败:', error)
-    ElMessage.error('加载收藏帖子失败')
+    console.error('加载收藏文章失败:', error)
+    ElMessage.error('加载收藏文章失败')
   } finally {
     loadingFavorites.value = false
   }
 }
 
-// 删除帖子
+// 删除文章
 const deletePost = async (post) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除帖子 "${post.title}" 吗？`,
+      `确定要删除文章 "${post.title}" 吗？`,
       '删除确认',
       {
         confirmButtonText: '确定',
@@ -535,15 +535,15 @@ const deletePost = async (post) => {
     const response = await postApi.deletePost(post.id)
     
     if (response.data.success) {
-      ElMessage.success('帖子删除成功')
-      // 重新加载帖子列表
+      ElMessage.success('文章删除成功')
+      // 重新加载文章列表
       loadUserPosts()
     } else {
       ElMessage.error(response.data.message || '删除失败')
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除帖子失败:', error)
+      console.error('删除文章失败:', error)
       ElMessage.error('删除失败，请稍后重试')
     }
   }
@@ -596,25 +596,24 @@ const viewPost = (postId) => {
   router.push(`/article_comment/${postId}`)
 }
 
-// 日期格式化函数，处理帖子时间
-const formatDate = (post) => {
-  if (!post) return ''
-  
-  // 尝试多种可能的时间字段名
-  let dateValue = post.createdAt || post.created || post.created_at || post.createTime
-  
-  if (!dateValue) return ''
-  
-  const date = new Date(dateValue)
-  if (isNaN(date.getTime())) return '' // 检查日期是否有效
-  
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  })
-}
-
+    // 日期格式化函数，处理文章时间
+    const formatDate = (post) => {
+      if (!post) return ''
+      
+      // 尝试多种可能的时间字段名
+      let dateValue = post.createdAt || post.created || post.created_at || post.createTime
+      
+      if (!dateValue) return ''
+      
+      const date = new Date(dateValue)
+      if (isNaN(date.getTime())) return '' // 检查日期是否有效
+      
+      return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
+    }
 // 日期格式化函数，用于表格显示
 const dateFormatTable = (row, column, cellValue) => {
   if (!cellValue) return ''

@@ -42,22 +42,22 @@ apiClient.interceptors.response.use(
 // 用户相关API
 export const userApi = {
   // 获取用户信息
-  getUserInfo: () => apiClient.get('/profile/info'),
+  getUserInfo: () => apiClient.get('/user/info'),
   
   // 更新用户信息
-  updateUserInfo: (data) => apiClient.post('/profile', data),
+  updateUserInfo: (data) => apiClient.post('/user', data),
   
   // 更新用户名
-  updateUsername: (username) => apiClient.post('/profile/username', { username }),
+  updateUsername: (username) => apiClient.post('/user/username', { username }),
   
   // 更新个人简介
-  updateBio: (bio) => apiClient.post('/profile/bio', { bio }),
+  updateBio: (bio) => apiClient.post('/user/bio', { bio }),
   
   // 上传头像
   uploadAvatar: (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiClient.post('/profile/avatar', formData, {
+    return apiClient.post('/user/avatar', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -73,20 +73,20 @@ export const userApi = {
       confirmNewPassword: data.confirmPassword
     };
     console.log(transformedData)
-    return apiClient.post('/profile/password', transformedData);
+    return apiClient.post('/user/password', transformedData);
   },
   
   // 删除账户
-  deleteUser: () => apiClient.delete('/profile'),
+  deleteUser: () => apiClient.delete('/user'),
   
   // 获取我的文章
-  getMyArticles: (params) => apiClient.post('/profile/articles', params),
+  getMyArticles: (params) => apiClient.post('/user/articles', params),
   
   // 获取我喜欢的文章
-  getLikedArticles: (params) => apiClient.post('/profile/liked-articles', params),
+  getLikedArticles: (params) => apiClient.post('/user/liked-articles', params),
   
   // 获取我的收藏
-  getFavoritedArticles: (params) => apiClient.post('/profile/favorited-articles', params),
+  getFavoritedArticles: (params) => apiClient.post('/user/favorited-articles', params),
 };
 
 // 文章相关API

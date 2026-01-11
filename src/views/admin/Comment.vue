@@ -23,10 +23,10 @@ const getAllComments = () => {
     data: pageParams
   }).then((response) => {
     if (response.data.success) {
-      comments.value = response.data.map.comments
-      total.value = response.data.map.pageParams.total
+      comments.value = response.data.map.comments || []
+      total.value = response.data.map.total || 0
     } else {
-      ElMessage.error(response.data.msg)
+      ElMessage.error(response.data.msg || '获取评论失败')
     }
   }).catch((error) => {
     ElMessage.error('获取评论失败')
@@ -96,9 +96,16 @@ const deleteComment = (commentId) => {
 }
 
 // 格式化日期
-const formatDate = (dateString) => {
+const formatDate = (data, property) => {
+  const dateString = data[property]
+  if (!dateString) return ''
+  // 如果是字符串格式的日期，直接返回
+  if (typeof dateString === 'string') {
+    return dateString
+  }
+  // 如果是Date对象，转换为字符串
   const date = new Date(dateString)
-  return date.toLocaleDateString()
+  return isNaN(date.getTime()) ? '' : date.toLocaleDateString()
 }
 
 // 组件挂载时获取数据
@@ -119,18 +126,17 @@ onMounted(() => {
       <div class="comment-table">
         <el-table :data="comments" style="width: 100%">
           <el-table-column prop="id" label="ID" width="80" />
-          <el-table-column prop="articleId" label="文章ID" width="120" />
-          <el-table-column prop="author" label="评论者" width="150" />
+          <el-table-column prop="articleId" label="文章ID" width="100" />
+          <el-table-column prop="author" label="评论者" width="120" />
           <el-table-column prop="content" label="评论内容" show-overflow-tooltip />
-          <el-table-column prop="created" label="评论时间" width="180" :formatter="formatDate" />
-          <el-table-column prop="status" label="状态" width="120">
+          <el-table-column prop="created" label="评论时间" width="120" />
+          <el-table-column prop="status" label="状态" width="100">
             <template #default="scope">
               <el-tag :type="scope.row.status === 'approved' ? 'success' : 'danger'">
                 {{ scope.row.status === 'approved' ? '已通过' : '已拒绝' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="ip" label="IP地址" width="150" />
           <el-table-column label="操作" width="200" fixed="right">
             <template #default="scope">
               <el-button

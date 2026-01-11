@@ -326,7 +326,7 @@ const authHeaders = computed(() => {
 
 // 计算属性：头像上传URL
 const uploadAvatarUrl = computed(() => {
-  return '/api/profile/avatar'
+  return '/api/user/avatar'
 })
 
 // 标签页切换处理
@@ -360,7 +360,7 @@ const handleTabSelect = (index) => {
 // 头像上传相关
 const handleAvatarSuccess = (response, file, fileList) => {
   if (response.success) {
-    userInfo.avatar = response.data.avatarUrl
+    userInfo.avatar = response.map.data
     ElMessage.success('头像上传成功')
   } else {
     ElMessage.error(response.message || '头像上传失败')
